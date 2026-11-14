@@ -63,7 +63,18 @@
     if (/^\s*</.test(text)) throw new Error("html");
     const all = parseCSV(text).filter((r) => r.some((c) => c.trim() !== ""));
     if (!all.length) throw new Error("empty");
-    const data = { headers: all[0].map((h, i) => h.trim() || "Column " + (i + 1)), rows: all.slice(1) };
+    let headers = all[0].map((h, i) => h.trim() || "Column " + (i + 1));
+    let rows = all.slice(1);
+    // Keep only the columns listed in config.columns (e.g. Title + Lyrics); others are ignored.
+    if (Array.isArray(cfg.columns) && cfg.columns.length) {
+      const want = cfg.columns.map((c) => String(c).trim().toLowerCase());
+      const keep = headers.map((h, i) => (want.includes(h.toLowerCase()) ? i : -1)).filter((i) => i >= 0);
+      if (keep.length) {
+        headers = keep.map((i) => headers[i]);
+        rows = rows.map((r) => keep.map((i) => r[i] || ""));
+      }
+    }
+    const data = { headers, rows };
     cache.set(key, data);
     return data;
   }
@@ -189,6 +200,8 @@
 
   // Header toggle: always OFF when the page loads (the state is intentionally not remembered).
   els.autoplay.checked = false;
+  els.autoplay.autocomplete = "off"; // stop the browser restoring a previously-on state (e.g. after reload / Back on mobile)
+  window.addEventListener("pageshow", () => { els.autoplay.checked = false; syncAutoplayClass(); }); // also when restored from the back/forward cache
   function syncAutoplayClass() { els.detail.classList.toggle("ap", els.autoplay.checked); }
   els.autoplay.addEventListener("change", syncAutoplayClass);
 
@@ -302,7 +315,7 @@
     if (li >= 0 && (row[li] || "").trim()) els.lyrics.append(renderLyrics(row[li], hasAudio));
     state.headers.forEach((h, i) => {
       if (!(row[i] || "").trim()) return;
-      if (i === li) return;
+      if (i === li || i === ti) return; // lyrics are shown as blocks, title is the popup heading
       const dt = document.createElement("dt");
       dt.textContent = h;
       const dd = document.createElement("dd");

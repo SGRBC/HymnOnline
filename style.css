@@ -1,7 +1,9 @@
-﻿:root {
+:root {
   --bg: #f5ede4; --surface: #fffaf5; --border: #dccbb8; --text: #3b2a1e;
   --muted: #7a6350; --accent: #7b4a2b; --hover: #efe0d0;
+  color-scheme: light; /* keep native controls (dropdown lists) light on phones in dark mode */
 }
+option { background-color: #fffaf5; color: #3b2a1e; }
 * { box-sizing: border-box; }
 body {
   margin: 0; background: var(--bg); color: var(--text);
@@ -11,9 +13,9 @@ header {
   position: sticky; top: 0; z-index: 2; background: var(--surface);
   border-bottom: 1px solid var(--border); padding: 12px 16px;
 }
-.title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
-h1 { margin: 0; font-size: 20px; color: var(--accent); }
-.switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: var(--muted); user-select: none; }
+.title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: nowrap; margin-bottom: 8px; }
+h1 { margin: 0; font-size: 20px; color: var(--accent); min-width: 0; overflow-wrap: anywhere; }
+.switch { flex: 0 0 auto; position: relative; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: var(--muted); user-select: none; }
 .switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 .switch .track { position: relative; width: 36px; height: 20px; border-radius: 10px; background: var(--border); transition: background .15s; }
 .switch .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .15s; }
@@ -84,3 +86,4 @@ dialog.ap .stanza.verse1 .stanza-label::after { content: "  \25B6  select to pla
 dl { margin: 0; padding: 12px 16px; }
 dt { color: var(--muted); font-size: 12px; text-transform: uppercase; margin-top: 10px; }
 dd { margin: 2px 0 0; white-space: pre-wrap; word-break: break-word; }
+@media (max-width: 420px) { h1 { font-size: 17px; } .switch { gap: 6px; font-size: 12px; } }

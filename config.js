@@ -7,6 +7,9 @@ window.APP_CONFIG = {
   // "Anyone with the link - Viewer".
   sheetId: "1YqBE2cUhL8rwm_dBSBCMkmzJnL0CdVz2",
 
+  // Only these columns (header text) are used; any other column of the sheet (e.g. Author) is ignored.
+  columns: ["Title", "Lyrics"],
+
   // Tabs to show. Leave empty to load only the first tab.
   // Example: ["Hymns", "Index", "Categories"]
   sheets: [],
