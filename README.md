@@ -43,8 +43,17 @@ embedded MP3 player for that song (the MP3 whose file name starts with the same 
 `001 Holy Holy Holy.mp3` for `001 Holy, Holy, Holy`). Nothing is downloaded or stored in this repo; the audio is
 streamed from the Drive folder. Notes:
 
-- Drive's embedded player may need one click on its play button, because browsers often block scripted auto-play
-  of cross-site players. With the toggle off, use the **Show player** button in the song popup to load the player.
+- **Real auto-play needs a Google API key (`driveApiKey` in [`config.js`](config.js)).** Without a key the page can
+  only embed Drive's player, and browsers do not let a page press play inside another site's player, so the visitor
+  has to press play once. With a key, the MP3 is fetched through the Drive API and played by the page itself, so it
+  starts as soon as a title is clicked (toggle on). If the API call fails, it falls back to the Drive player.
+  With the toggle off, use the **Show player** button in the song popup to load the player.
+- Creating the key: [Google Cloud Console](https://console.cloud.google.com/) > create/select a project >
+  **APIs & Services > Library > Google Drive API > Enable** > **Credentials > Create credentials > API key**.
+  Then edit the key and set **Application restrictions: Websites** (`https://<user>.github.io/*`) and
+  **API restrictions: Google Drive API** only. Paste it into `driveApiKey`.
+  The key is visible to anyone who views the page source, so these two restrictions are mandatory; never use an
+  unrestricted key and never reuse a key that has access to anything else.
 - The Drive folder must stay shared as **Anyone with the link - Viewer**.
 - **New songs / new MP3s are matched automatically.** A song is matched to an MP3 by the number at the start of
   its name: the sheet row `117 My New Hymn` uses an MP3 named `117 ....mp3` in the Drive folder (or any of its

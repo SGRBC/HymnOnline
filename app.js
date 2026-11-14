@@ -10,9 +10,22 @@
     detail: $("detail"), detailTitle: $("detailTitle"), detailBody: $("detailBody"),
     closeDetail: $("closeDetail"), player: $("player"),
     trackSelect: $("trackSelect"), autoplay: $("autoplay"), driveLink: $("driveLink"), lyrics: $("lyrics"),
-    loadPlayer: $("loadPlayer"),
+    loadPlayer: $("loadPlayer"), audio: $("audio"), audioMsg: $("audioMsg"),
     drivePlayer: $("drivePlayer")
   };
+
+  // If the browser mixes an old cached file with a new one, an expected element can be missing.
+  // Say so on the page instead of failing silently with an empty table.
+  const missing = Object.keys(els).filter((k) => !els[k]);
+  if (missing.length) {
+    const box = document.createElement("pre");
+    box.textContent = "The page files are out of sync (missing: " + missing.join(", ") + ").\n" +
+      "Hard-refresh the page (Ctrl+F5, or clear this site's cached data) and try again.";
+    box.style.padding = "16px";
+    box.style.whiteSpace = "pre-wrap";
+    document.body.prepend(box);
+    return;
+  }
 
   const state = { headers: [], rows: [], view: [], page: 0, sortCol: -1, sortDir: 1, query: "", col: -1 };
   const cache = new Map();
@@ -215,25 +228,107 @@
 
   const driveUrl = (id) => "https://drive.google.com/file/d/" + encodeURIComponent(id) + "/view";
   const previewUrl = (id) => "https://drive.google.com/file/d/" + encodeURIComponent(id) + "/preview";
+  const apiKey = typeof cfg.driveApiKey === "string" ? cfg.driveApiKey.trim() : "";
   let currentTrack = null;
+  let playToken = 0;      // invalidates in-flight downloads when the song/track changes or the popup closes
+  let blobUrl = "";
+  let abortCtl = null;
+
+  function releaseNative() {
+    playToken++;
+    if (abortCtl) { abortCtl.abort(); abortCtl = null; }
+    els.audio.pause();
+    els.audio.removeAttribute("src");
+    els.audio.load();
+    els.audio.hidden = true;
+    if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = ""; }
+    els.audioMsg.hidden = true;
+  }
 
   function setTrack(t) {
+    releaseNative();
     currentTrack = t;
     els.drivePlayer.removeAttribute("src");
     els.drivePlayer.hidden = true;
     els.driveLink.href = driveUrl(t.id);
   }
 
-  // Loads Drive's player for the current track (automatically when the header toggle is on, or via "Show player").
-  function playAudio() {
-    if (!currentTrack) return;
+  // Fallback: Drive's embedded player (the visitor has to press its play button; a page cannot do that for them).
+  function showDrivePlayer() {
+    els.audio.pause();
+    els.audio.removeAttribute("src");
+    els.audio.load();
+    els.audio.hidden = true;
+    els.audioMsg.hidden = true;
     els.drivePlayer.src = previewUrl(currentTrack.id);
     els.drivePlayer.hidden = false;
+  }
+
+  // With a Drive API key the MP3 is fetched (key sent in a request header, not in the URL) and played in the
+  // page's own <audio>, which is what allows true auto-play. Without a key, or on any failure, use the fallback.
+  // iOS/Safari only allow play() inside the tap that triggered it, but the MP3 arrives later. So during the tap we
+  // "unlock" the <audio> element by playing a silent clip; afterwards the real MP3 can be swapped in and played.
+  let silentUrl = "";
+  function unlockAudio() {
+    if (!silentUrl) {
+      const rate = 8000, n = 800, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+      const str = (o, t) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
+      str(0, "RIFF"); v.setUint32(4, 36 + n * 2, true); str(8, "WAVEfmt "); v.setUint32(16, 16, true);
+      v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true);
+      v.setUint16(32, 2, true); v.setUint16(34, 16, true); str(36, "data"); v.setUint32(40, n * 2, true);
+      silentUrl = URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
+    }
+    els.audio.src = silentUrl;
+    const p = els.audio.play();
+    if (p && p.catch) p.catch(() => { /* replaced by the real MP3, or refused: handled after the download */ });
+  }
+
+  // With a Drive API key the MP3 is fetched (key sent in a request header, not in the URL) and played in the
+  // page's own <audio>, which is what allows true auto-play. Without a key, or on any failure, use the fallback.
+  async function playNative(track) {
+    unlockAudio(); // must run synchronously inside the user's tap, before any await
+    const token = ++playToken;
+    if (abortCtl) abortCtl.abort();
+    abortCtl = new AbortController();
+    const timer = setTimeout(() => abortCtl && abortCtl.abort(), 60000);
+    els.drivePlayer.removeAttribute("src");
+    els.drivePlayer.hidden = true;
+    els.audio.hidden = false;
+    els.audioMsg.textContent = "Loading MP3…";
+    els.audioMsg.hidden = false;
+    try {
+      const res = await fetch("https://www.googleapis.com/drive/v3/files/" + encodeURIComponent(track.id) + "?alt=media", {
+        headers: { "X-Goog-Api-Key": apiKey },
+        signal: abortCtl.signal
+      });
+      if (!res.ok) throw new Error("http");
+      const blob = await res.blob();
+      if (token !== playToken) return; // song changed / popup closed meanwhile
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
+      blobUrl = URL.createObjectURL(blob);
+      els.audio.src = blobUrl;
+      els.audioMsg.hidden = true;
+      try { await els.audio.play(); } catch (e) {
+        // the browser refused scripted play: the controls are visible, one tap on play starts it
+        if (token === playToken) { els.audioMsg.textContent = "Tap play to start the MP3."; els.audioMsg.hidden = false; }
+      }
+    } catch (e) {
+      if (token === playToken && currentTrack === track) showDrivePlayer();
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  // Loads the MP3 for the current track (automatically when the header toggle is on, or via "Show player").
+  function playAudio() {
+    if (!currentTrack) return;
+    if (apiKey) playNative(currentTrack); else showDrivePlayer();
   }
 
   els.loadPlayer.addEventListener("click", playAudio);
 
   function stopAudio() {
+    releaseNative();
     currentTrack = null;
     els.drivePlayer.removeAttribute("src");
     els.drivePlayer.hidden = true;

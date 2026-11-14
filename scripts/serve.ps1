@@ -21,6 +21,7 @@ try {
     if ($full.StartsWith($root, [System.StringComparison]::OrdinalIgnoreCase) -and $types.ContainsKey($ext) -and (Test-Path $full -PathType Leaf)) {
       $bytes = [System.IO.File]::ReadAllBytes($full)
       $ctx.Response.ContentType = $types[$ext]
+      $ctx.Response.Headers.Add("Cache-Control", "no-store")   # always serve the latest files while testing
       $ctx.Response.ContentLength64 = $bytes.Length
       $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
     } else {

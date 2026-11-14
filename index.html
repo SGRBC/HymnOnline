@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src https://docs.google.com https://*.googleusercontent.com; media-src 'self'; frame-src https://drive.google.com; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src https://docs.google.com https://*.googleusercontent.com https://www.googleapis.com; media-src blob:; frame-src https://drive.google.com; img-src 'self' data:; base-uri 'none'; form-action 'none'">
   <title>Worksheet Browser</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
   <header>
@@ -48,6 +48,8 @@
     </div>
     <div id="player" hidden>
       <select id="trackSelect" aria-label="Choose recording" hidden></select>
+      <div id="audioMsg" role="status" hidden></div>
+      <audio id="audio" controls preload="none" hidden></audio>
       <iframe id="drivePlayer" title="MP3 player (Google Drive)" hidden allow="autoplay"></iframe>
       <div class="player-opts">
         <button type="button" id="loadPlayer">&#9654; Show player</button>
@@ -58,8 +60,8 @@
     <dl id="detailBody"></dl>
   </dialog>
 
-  <script src="config.js"></script>
-  <script src="audio-map.js"></script>
-  <script src="app.js"></script>
+  <script src="config.js?v=3"></script>
+  <script src="audio-map.js?v=3"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

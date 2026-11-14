@@ -18,10 +18,19 @@ window.APP_CONFIG = {
   // Leave "" to use the first column.
   titleColumn: "",
 
-  // Column (header text) holding the lyrics. Its [Verse 1]/[Chorus]... sections are shown as
-  // separate blocks; selecting Verse 1 plays the matching MP3 (matched by the 3-digit song
+  // Column (header text) holding the lyrics. It is hidden in the table; clicking a song title shows
+  // the lyrics (split into [Verse]/[Chorus] blocks) and, if available, the matching MP3 (matched by the
   // number at the start of the title, see audio-map.js).
   lyricsColumn: "Lyrics",
+
+  // Optional but REQUIRED for real auto-play of the MP3s. Browsers never let a page press play inside Drive's
+  // embedded player, so with no key the app shows Drive's player and the visitor presses play once.
+  // With a Google API key the app loads the MP3 through the Drive API and plays it itself.
+  // Create the key in Google Cloud Console (APIs & Services): enable "Google Drive API", create an API key, then
+  // restrict it to (1) "HTTP referrers" = your GitHub Pages site, e.g. https://<user>.github.io/*  and
+  // (2) API restrictions = "Google Drive API" only. Such a browser key is visible to anyone who opens the site,
+  // so these two restrictions are what protect it. Leave "" to disable.
+  driveApiKey: "AIzaSyA59kql1jn5lsQQN6KTT44tID_ePWirFMQ",
 
   pageSize: 50
 };
