@@ -1,0 +1,36 @@
+name: Update MP3 map from Google Drive
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"   # every 6 hours
+  workflow_dispatch:          # also runnable by hand from the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-audio-map
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Rebuild audio-map.js from the Drive folder
+        shell: pwsh
+        run: ./scripts/build-audio-map.ps1
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- audio-map.js; then
+            echo "audio-map.js unchanged"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add audio-map.js
+            git commit -m "Update MP3 map from Google Drive"
+            git push
+          fi
