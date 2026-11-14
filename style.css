@@ -11,7 +11,16 @@ header {
   position: sticky; top: 0; z-index: 2; background: var(--surface);
   border-bottom: 1px solid var(--border); padding: 12px 16px;
 }
-h1 { margin: 0 0 8px; font-size: 20px; color: var(--accent); }
+.title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+h1 { margin: 0; font-size: 20px; color: var(--accent); }
+.switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: var(--muted); user-select: none; }
+.switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.switch .track { position: relative; width: 36px; height: 20px; border-radius: 10px; background: var(--border); transition: background .15s; }
+.switch .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .15s; }
+.switch input:checked + .track { background: var(--accent); }
+.switch input:checked + .track::after { left: 18px; }
+.switch input:focus-visible + .track { outline: 2px solid var(--accent); outline-offset: 2px; }
+#loadPlayer { padding: 3px 10px; border: 1px solid var(--border); background: var(--surface); border-radius: 4px; cursor: pointer; font: inherit; color: var(--text); }
 #tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
 #tabs button {
   border: 1px solid var(--border); background: var(--bg); padding: 4px 12px;
@@ -27,6 +36,7 @@ input[type=search]:focus, select:focus, button:focus-visible, th:focus-visible, 
   outline: 2px solid var(--accent); outline-offset: 1px;
 }
 input[type=search] { flex: 1 1 220px; max-width: 420px; }
+#songSelect { flex: 0 1 280px; min-width: 0; max-width: 100%; }
 #count { color: var(--muted); font-size: 13px; }
 main { padding: 16px; }
 #status { color: var(--muted); padding: 8px 0; white-space: pre-wrap; }
@@ -66,8 +76,9 @@ dialog::backdrop { background: rgba(0,0,0,.35); }
 .stanza { margin: 0 0 10px; padding: 6px 10px; border-left: 3px solid var(--border); border-radius: 2px; }
 .stanza-label { color: var(--muted); font-size: 12px; text-transform: uppercase; }
 .stanza-text { white-space: pre-wrap; word-break: break-word; }
-.stanza.verse1 { cursor: pointer; border-left-color: var(--accent); }
-.stanza.verse1:hover, .stanza.playing { background: var(--hover); }
+.stanza.verse1 { border-left-color: var(--accent); }
+dialog.ap .stanza.verse1 { cursor: pointer; }
+dialog.ap .stanza.verse1:hover, .stanza.playing { background: var(--hover); }
 dialog.ap .stanza.verse1 .stanza-label::after { content: "  \25B6  select to play MP3"; color: var(--accent); }
 .lyrics-block { padding: 12px 16px 0; }
 dl { margin: 0; padding: 12px 16px; }

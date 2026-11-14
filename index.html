@@ -9,9 +9,17 @@
 </head>
 <body>
   <header>
-    <h1 id="title">Worksheet Browser</h1>
+    <div class="title-row">
+      <h1 id="title">Worksheet Browser</h1>
+      <label class="switch" title="When on, selecting Verse 1 of a song loads its MP3 player">
+        <input type="checkbox" id="autoplay" role="switch">
+        <span class="track" aria-hidden="true"></span>
+        <span class="switch-label">Auto-play MP3</span>
+      </label>
+    </div>
     <div id="tabs" role="tablist" aria-label="Sheets"></div>
     <div class="controls">
+      <select id="songSelect" aria-label="Jump to a song"></select>
       <input id="search" type="search" placeholder="Search all columns…" aria-label="Search">
       <select id="columnFilter" aria-label="Search in column"></select>
       <span id="count" aria-live="polite"></span>
@@ -42,7 +50,7 @@
       <select id="trackSelect" aria-label="Choose recording" hidden></select>
       <iframe id="drivePlayer" title="MP3 player (Google Drive)" hidden allow="autoplay"></iframe>
       <div class="player-opts">
-        <label><input type="checkbox" id="autoplay"> Load the MP3 player when I select Verse 1</label>
+        <button type="button" id="loadPlayer">&#9654; Show player</button>
         <a id="driveLink" target="_blank" rel="noopener noreferrer">Open MP3 in Drive</a>
       </div>
     </div>

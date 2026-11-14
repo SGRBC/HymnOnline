@@ -4,12 +4,13 @@
   const cfg = window.APP_CONFIG || {};
   const $ = (id) => document.getElementById(id);
   const els = {
-    title: $("title"), tabs: $("tabs"), search: $("search"), colFilter: $("columnFilter"),
+    title: $("title"), tabs: $("tabs"), search: $("search"), colFilter: $("columnFilter"), songSelect: $("songSelect"),
     count: $("count"), status: $("status"), table: $("table"), pager: $("pager"),
     prev: $("prev"), next: $("next"), pageInfo: $("pageInfo"),
     detail: $("detail"), detailTitle: $("detailTitle"), detailBody: $("detailBody"),
     closeDetail: $("closeDetail"), player: $("player"),
     trackSelect: $("trackSelect"), autoplay: $("autoplay"), driveLink: $("driveLink"), lyrics: $("lyrics"),
+    loadPlayer: $("loadPlayer"),
     drivePlayer: $("drivePlayer")
   };
 
@@ -186,13 +187,10 @@
     audioByNum.get(t.n).push(t);
   });
 
-  const AP_KEY = "autoplayVerse1";
-  try { els.autoplay.checked = localStorage.getItem(AP_KEY) !== "0"; } catch (e) { els.autoplay.checked = true; }
+  // Header toggle: always OFF when the page loads (the state is intentionally not remembered).
+  els.autoplay.checked = false;
   function syncAutoplayClass() { els.detail.classList.toggle("ap", els.autoplay.checked); }
-  els.autoplay.addEventListener("change", () => {
-    try { localStorage.setItem(AP_KEY, els.autoplay.checked ? "1" : "0"); } catch (e) { /* ignore */ }
-    syncAutoplayClass();
-  });
+  els.autoplay.addEventListener("change", syncAutoplayClass);
 
   const driveUrl = (id) => "https://drive.google.com/file/d/" + encodeURIComponent(id) + "/view";
   const previewUrl = (id) => "https://drive.google.com/file/d/" + encodeURIComponent(id) + "/preview";
@@ -205,12 +203,14 @@
     els.driveLink.href = driveUrl(t.id);
   }
 
-  // Loads Drive's player for the current track (the player is created only when Verse 1 is selected).
+  // Loads Drive's player for the current track (on Verse 1 when the header toggle is on, or via "Show player").
   function playAudio() {
     if (!currentTrack) return;
     els.drivePlayer.src = previewUrl(currentTrack.id);
     els.drivePlayer.hidden = false;
   }
+
+  els.loadPlayer.addEventListener("click", playAudio);
 
   function stopAudio() {
     currentTrack = null;
@@ -312,6 +312,23 @@
     els.detail.showModal();
   }
 
+  // Dropdown of all songs (titles from the title column, in sheet order). Selecting one opens its lyrics.
+  function fillSongSelect() {
+    const ti = Math.max(0, state.headers.indexOf(cfg.titleColumn));
+    els.songSelect.textContent = "";
+    els.songSelect.add(new Option("Select a song…", ""));
+    state.rows.forEach((r, i) => {
+      const title = (r[ti] || "").trim();
+      if (title) els.songSelect.add(new Option(title, String(i)));
+    });
+  }
+
+  els.songSelect.addEventListener("change", () => {
+    const row = state.rows[Number(els.songSelect.value)];
+    els.songSelect.value = ""; // back to the placeholder so the same song can be picked again
+    if (row) showDetail(row);
+  });
+
   function fillColumnFilter() {
     els.colFilter.textContent = "";
     const all = new Option("All columns", "-1");
@@ -330,6 +347,7 @@
       state.sortCol = -1; state.sortDir = 1; state.col = -1;
       els.table.hidden = false;
       fillColumnFilter();
+      fillSongSelect();
       renderHead();
       applyFilter();
     } catch (e) {

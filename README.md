@@ -38,13 +38,13 @@ Open http://127.0.0.1:8000/ (Ctrl+C to stop). Once hosted on GitHub Pages this i
 
 ## MP3 playback (from the shared Drive folder)
 
-The lyrics of a song are split into Verse / Chorus blocks. Selecting the **Verse 1** block loads Drive's
+The lyrics of a song are split into Verse / Chorus blocks. With the **Auto-play MP3** toggle (top right, next to the page title; **off** every time the page loads) switched on, selecting the **Verse 1** block loads Drive's
 embedded MP3 player for that song (the MP3 whose file name starts with the same 3-digit number, e.g.
 `001 Holy Holy Holy.mp3` for `001 Holy, Holy, Holy`). Nothing is downloaded or stored in this repo; the audio is
 streamed from the Drive folder. Notes:
 
 - Drive's embedded player may need one click on its play button, because browsers often block scripted auto-play
-  of cross-site players. The checkbox "Load the MP3 player when I select Verse 1" turns the Verse 1 behaviour on/off.
+  of cross-site players. With the toggle off, use the **Show player** button in the song popup to load the player.
 - The Drive folder must stay shared as **Anyone with the link - Viewer**.
 - **New songs / new MP3s are matched automatically.** A song is matched to an MP3 by the number at the start of
   its name: the sheet row `117 My New Hymn` uses an MP3 named `117 ....mp3` in the Drive folder (or any of its
