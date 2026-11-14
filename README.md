@@ -38,7 +38,7 @@ Open http://127.0.0.1:8000/ (Ctrl+C to stop). Once hosted on GitHub Pages this i
 
 ## MP3 playback (from the shared Drive folder)
 
-The lyrics of a song are split into Verse / Chorus blocks. With the **Auto-play MP3** toggle (top right, next to the page title; **off** every time the page loads) switched on, selecting the **Verse 1** block loads Drive's
+Click a song title to open its lyrics (split into Verse / Chorus blocks). With the **Auto-play MP3** toggle (top right, next to the page title; **off** every time the page loads) switched on, opening a song also loads Drive's
 embedded MP3 player for that song (the MP3 whose file name starts with the same 3-digit number, e.g.
 `001 Holy Holy Holy.mp3` for `001 Holy, Holy, Holy`). Nothing is downloaded or stored in this repo; the audio is
 streamed from the Drive folder. Notes:

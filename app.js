@@ -4,7 +4,7 @@
   const cfg = window.APP_CONFIG || {};
   const $ = (id) => document.getElementById(id);
   const els = {
-    title: $("title"), tabs: $("tabs"), search: $("search"), colFilter: $("columnFilter"), songSelect: $("songSelect"),
+    title: $("title"), tabs: $("tabs"), search: $("search"), colFilter: $("columnFilter"),
     count: $("count"), status: $("status"), table: $("table"), pager: $("pager"),
     prev: $("prev"), next: $("next"), pageInfo: $("pageInfo"),
     detail: $("detail"), detailTitle: $("detailTitle"), detailBody: $("detailBody"),
@@ -211,9 +211,7 @@
   // Header toggle: always OFF when the page loads (the state is intentionally not remembered).
   els.autoplay.checked = false;
   els.autoplay.autocomplete = "off"; // stop the browser restoring a previously-on state (e.g. after reload / Back on mobile)
-  window.addEventListener("pageshow", () => { els.autoplay.checked = false; syncAutoplayClass(); }); // also when restored from the back/forward cache
-  function syncAutoplayClass() { els.detail.classList.toggle("ap", els.autoplay.checked); }
-  els.autoplay.addEventListener("change", syncAutoplayClass);
+  window.addEventListener("pageshow", () => { els.autoplay.checked = false; }); // also when restored from the back/forward cache
 
   const driveUrl = (id) => "https://drive.google.com/file/d/" + encodeURIComponent(id) + "/view";
   const previewUrl = (id) => "https://drive.google.com/file/d/" + encodeURIComponent(id) + "/preview";
@@ -226,7 +224,7 @@
     els.driveLink.href = driveUrl(t.id);
   }
 
-  // Loads Drive's player for the current track (on Verse 1 when the header toggle is on, or via "Show player").
+  // Loads Drive's player for the current track (automatically when the header toggle is on, or via "Show player").
   function playAudio() {
     if (!currentTrack) return;
     els.drivePlayer.src = previewUrl(currentTrack.id);
@@ -252,7 +250,6 @@
     tracks.forEach((t, i) => els.trackSelect.add(new Option(t.name.replace(/\.mp3$/i, ""), String(i))));
     if (tracks.length) setTrack(tracks[0]); else currentTrack = null;
     els.trackSelect.onchange = () => { setTrack(tracks[Number(els.trackSelect.value)]); playAudio(); };
-    syncAutoplayClass();
     return tracks.length > 0;
   }
 
@@ -272,7 +269,7 @@
       .filter((s) => s.text || s.label);
   }
 
-  function renderLyrics(text, hasAudio) {
+  function renderLyrics(text) {
     const wrap = document.createElement("div");
     wrap.className = "lyrics-block";
     const h = document.createElement("div");
@@ -280,11 +277,7 @@
     h.textContent = cfg.lyricsColumn;
     wrap.append(h);
     const stanzas = parseLyrics(text);
-    // Verse 1 = first "Verse"/"Verse 1" section; if none is labelled, the first stanza.
-    let v1 = stanzas.findIndex((s) => /^verse\s*1?$/i.test(s.label));
-    if (v1 < 0) v1 = 0;
-    const nodes = [];
-    stanzas.forEach((s, idx) => {
+    stanzas.forEach((s) => {
       const box = document.createElement("div");
       box.className = "stanza";
       if (s.label) {
@@ -297,19 +290,6 @@
       t.className = "stanza-text";
       t.textContent = s.text;
       box.append(t);
-      if (idx === v1 && hasAudio) {
-        box.classList.add("verse1");
-        box.tabIndex = 0;
-        box.setAttribute("role", "button");
-        const go = () => {
-          nodes.forEach((n) => n.classList.remove("playing"));
-          box.classList.add("playing");
-          if (els.autoplay.checked) playAudio();
-        };
-        box.addEventListener("click", go);
-        box.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
-      }
-      nodes.push(box);
       wrap.append(box);
     });
     return wrap;
@@ -322,7 +302,7 @@
     els.detailBody.textContent = "";
     const hasAudio = setupPlayer(row, ti);
     els.lyrics.textContent = "";
-    if (li >= 0 && (row[li] || "").trim()) els.lyrics.append(renderLyrics(row[li], hasAudio));
+    if (li >= 0 && (row[li] || "").trim()) els.lyrics.append(renderLyrics(row[li]));
     state.headers.forEach((h, i) => {
       if (!(row[i] || "").trim()) return;
       if (i === li || i === ti) return; // lyrics are shown as blocks, title is the popup heading
@@ -333,24 +313,9 @@
       els.detailBody.append(dt, dd);
     });
     els.detail.showModal();
+    // Auto-play toggle on: opening a song (clicking its title) loads and starts its MP3 player.
+    if (hasAudio && els.autoplay.checked) playAudio();
   }
-
-  // Dropdown of all songs (titles from the title column, in sheet order). Selecting one opens its lyrics.
-  function fillSongSelect() {
-    const ti = Math.max(0, state.headers.indexOf(cfg.titleColumn));
-    els.songSelect.textContent = "";
-    els.songSelect.add(new Option("Select a song…", ""));
-    state.rows.forEach((r, i) => {
-      const title = (r[ti] || "").trim();
-      if (title) els.songSelect.add(new Option(title, String(i)));
-    });
-  }
-
-  els.songSelect.addEventListener("change", () => {
-    const row = state.rows[Number(els.songSelect.value)];
-    els.songSelect.value = ""; // back to the placeholder so the same song can be picked again
-    if (row) showDetail(row);
-  });
 
   function fillColumnFilter() {
     els.colFilter.textContent = "";
@@ -370,7 +335,6 @@
       state.sortCol = -1; state.sortDir = 1; state.col = -1;
       els.table.hidden = false;
       fillColumnFilter();
-      fillSongSelect();
       renderHead();
       applyFilter();
     } catch (e) {
