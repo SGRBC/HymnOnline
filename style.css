@@ -1,0 +1,75 @@
+﻿:root {
+  --bg: #f5ede4; --surface: #fffaf5; --border: #dccbb8; --text: #3b2a1e;
+  --muted: #7a6350; --accent: #7b4a2b; --hover: #efe0d0;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 15px/1.5 -apple-system, "Segoe UI", system-ui, sans-serif;
+}
+header {
+  position: sticky; top: 0; z-index: 2; background: var(--surface);
+  border-bottom: 1px solid var(--border); padding: 12px 16px;
+}
+h1 { margin: 0 0 8px; font-size: 20px; color: var(--accent); }
+#tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
+#tabs button {
+  border: 1px solid var(--border); background: var(--bg); padding: 4px 12px;
+  border-radius: 4px; cursor: pointer; font: inherit;
+}
+#tabs button[aria-selected="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+.controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+input[type=search], select {
+  padding: 6px 10px; border: 1px solid var(--border); border-radius: 4px; font: inherit;
+  background: var(--surface); color: var(--text);
+}
+input[type=search]:focus, select:focus, button:focus-visible, th:focus-visible, tr:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 1px;
+}
+input[type=search] { flex: 1 1 220px; max-width: 420px; }
+#count { color: var(--muted); font-size: 13px; }
+main { padding: 16px; }
+#status { color: var(--muted); padding: 8px 0; white-space: pre-wrap; }
+#status.error { color: #b42318; }
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; }
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--bg); cursor: pointer; user-select: none; white-space: nowrap; position: sticky; top: 0; }
+th.sorted-asc::after { content: " \25B2"; font-size: 10px; }
+th.sorted-desc::after { content: " \25BC"; font-size: 10px; }
+tbody tr { cursor: pointer; }
+tbody tr:hover { background: var(--hover); }
+td { max-width: 360px; overflow: hidden; text-overflow: ellipsis; }
+mark { background: #e8c48a; color: inherit; }
+#pager { display: flex; justify-content: center; align-items: center; gap: 12px; padding: 12px 0; }
+#pager button {
+  padding: 6px 14px; border: 1px solid var(--border); background: var(--surface);
+  border-radius: 4px; cursor: pointer; font: inherit;
+}
+#pager button:disabled { opacity: .4; cursor: default; }
+dialog {
+  border: 1px solid var(--border); border-radius: 6px; padding: 0;
+  width: min(640px, 94vw); max-height: 86vh; overflow: auto;
+}
+dialog::backdrop { background: rgba(0,0,0,.35); }
+.dlg-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface);
+}
+.dlg-head h2 { margin: 0; font-size: 18px; }
+#closeDetail { border: 0; background: none; font-size: 24px; cursor: pointer; color: var(--muted); }
+#player { padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--bg); }
+#drivePlayer { width: 100%; height: 70px; border: 0; }
+#trackSelect { width: 100%; margin-bottom: 6px; }
+.player-opts { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 6px; font-size: 13px; }
+.player-opts a { color: var(--accent); }
+.stanza { margin: 0 0 10px; padding: 6px 10px; border-left: 3px solid var(--border); border-radius: 2px; }
+.stanza-label { color: var(--muted); font-size: 12px; text-transform: uppercase; }
+.stanza-text { white-space: pre-wrap; word-break: break-word; }
+.stanza.verse1 { cursor: pointer; border-left-color: var(--accent); }
+.stanza.verse1:hover, .stanza.playing { background: var(--hover); }
+dialog.ap .stanza.verse1 .stanza-label::after { content: "  \25B6  select to play MP3"; color: var(--accent); }
+.lyrics-block { padding: 12px 16px 0; }
+dl { margin: 0; padding: 12px 16px; }
+dt { color: var(--muted); font-size: 12px; text-transform: uppercase; margin-top: 10px; }
+dd { margin: 2px 0 0; white-space: pre-wrap; word-break: break-word; }

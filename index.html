@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src https://docs.google.com https://*.googleusercontent.com; media-src 'self'; frame-src https://drive.google.com; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+  <title>Worksheet Browser</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1 id="title">Worksheet Browser</h1>
+    <div id="tabs" role="tablist" aria-label="Sheets"></div>
+    <div class="controls">
+      <input id="search" type="search" placeholder="Search all columns…" aria-label="Search">
+      <select id="columnFilter" aria-label="Search in column"></select>
+      <span id="count" aria-live="polite"></span>
+    </div>
+  </header>
+
+  <main>
+    <div id="status" role="status"></div>
+    <div class="table-wrap">
+      <table id="table">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <nav id="pager" aria-label="Pagination">
+      <button id="prev">&laquo; Prev</button>
+      <span id="pageInfo"></span>
+      <button id="next">Next &raquo;</button>
+    </nav>
+  </main>
+
+  <dialog id="detail">
+    <div class="dlg-head">
+      <h2 id="detailTitle"></h2>
+      <button id="closeDetail" aria-label="Close">&times;</button>
+    </div>
+    <div id="player" hidden>
+      <select id="trackSelect" aria-label="Choose recording" hidden></select>
+      <iframe id="drivePlayer" title="MP3 player (Google Drive)" hidden allow="autoplay"></iframe>
+      <div class="player-opts">
+        <label><input type="checkbox" id="autoplay"> Load the MP3 player when I select Verse 1</label>
+        <a id="driveLink" target="_blank" rel="noopener noreferrer">Open MP3 in Drive</a>
+      </div>
+    </div>
+    <div id="lyrics"></div>
+    <dl id="detailBody"></dl>
+  </dialog>
+
+  <script src="config.js"></script>
+  <script src="audio-map.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
