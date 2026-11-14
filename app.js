@@ -138,11 +138,19 @@
     render();
   }
 
+  // Columns shown in the table: everything except the lyrics column (lyrics open in the popup instead;
+  // the column's data is still searchable).
+  function visibleCols() {
+    const li = cfg.lyricsColumn ? state.headers.indexOf(cfg.lyricsColumn) : -1;
+    return state.headers.map((_, i) => i).filter((i) => i !== li);
+  }
+
   function renderHead() {
     const thead = els.table.tHead;
     thead.textContent = "";
     const tr = thead.insertRow();
-    state.headers.forEach((h, i) => {
+    visibleCols().forEach((i) => {
+      const h = state.headers[i];
       const th = document.createElement("th");
       th.textContent = h;
       th.tabIndex = 0;
@@ -169,10 +177,12 @@
     slice.forEach(({ r }) => {
       const tr = document.createElement("tr");
       tr.tabIndex = 0;
-      state.headers.forEach((_, i) => {
+      const ti = Math.max(0, state.headers.indexOf(cfg.titleColumn));
+      visibleCols().forEach((i) => {
         const td = document.createElement("td");
         const text = r[i] || "";
-        td.title = text;
+        td.title = i === ti ? "Click to view the lyrics" : text;
+        if (i === ti) td.className = "title-cell";
         highlight(td, text, state.col < 0 || state.col === i ? q : "");
         tr.append(td);
       });

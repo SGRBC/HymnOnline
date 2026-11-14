@@ -41,6 +41,9 @@ input[type=search] { flex: 1 1 220px; max-width: 420px; }
 #songSelect { flex: 0 1 280px; min-width: 0; max-width: 100%; }
 #count { color: var(--muted); font-size: 13px; }
 main { padding: 16px; }
+#note { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+td.title-cell { color: var(--accent); font-weight: 600; }
+tbody tr:hover td.title-cell { text-decoration: underline; }
 #status { color: var(--muted); padding: 8px 0; white-space: pre-wrap; }
 #status.error { color: #b42318; }
 .table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; }
